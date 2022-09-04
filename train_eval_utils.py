@@ -2,7 +2,7 @@ import os, sys
 import torch
 from torch.utils.data import SubsetRandomSampler, DataLoader
 from reference_detect.engine import train_one_epoch, evaluate
-import utils
+import reference_detect.utils as utils
 from data_utils import BloodCellDataset
 
 
