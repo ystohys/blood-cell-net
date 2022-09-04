@@ -1,8 +1,23 @@
-from contextlib import redirect_stderr
 import os
+from PIL import Image, ImageDraw, ImageFont
 import numpy as np
 import pandas as pd
 import cv2
+
+
+def plot_img_w_box(img, tgt):
+    draw_img = ImageDraw.Draw(img)
+    for i, box in enumerate(tgt['boxes']):
+        if tgt['labels'][i] == 1:
+            draw_img.rectangle(box, outline='red')
+            font = ImageFont.truetype("sans_serif.ttf", 8)
+            draw_img.text(xy=(box[0]-5, box[1]-5), text="RBC", fill="red", font=font)
+        elif tgt['labels'][i] == 2:
+            draw_img.rectangle(box, outline='blue')
+            font = ImageFont.truetype("sans_serif.ttf", 8)
+            draw_img.text(xy=(box[0]-5, box[1]-5), text="WBC", fill="blue", font=font)
+    img.show()
+
 
 def show_img_with_anno(img_file_path, anno_file_path):
     img_file = os.path.split(img_file_path)[1]

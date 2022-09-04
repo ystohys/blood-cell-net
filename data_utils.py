@@ -82,8 +82,8 @@ def get_transform(train):
     transforms = []
     transforms.append(PILToNormTensor())
     if train:
-        transforms.append(T.RandomHorizontalFlip(0.5))
-        transforms.append(RandomVerticalFlip(0.5))
+        transforms.append(T.RandomHorizontalFlip(0.4))
+        transforms.append(RandomVerticalFlip(0.4))
     return T.Compose(transforms)
 
 
