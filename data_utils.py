@@ -8,7 +8,7 @@ from torch import nn
 from torch.utils.data import Dataset
 import torchvision.transforms.functional as F
 import torchvision.transforms.transforms as TT
-import transforms as T
+import reference_detect.transforms as T
 
 
 class BloodCellDataset(Dataset):
