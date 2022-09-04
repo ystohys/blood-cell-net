@@ -1,4 +1,5 @@
 import os, sys
+import numpy as np
 import torch
 from torch.utils.data import SubsetRandomSampler, DataLoader
 from reference_detect.engine import train_one_epoch, evaluate
@@ -89,7 +90,7 @@ def hocv_model(
     """
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     train_dataset = BloodCellDataset(dir_name, train_transforms)
-    no_transform_train = BloodCellDataset(dir_name)
+    non_augment_train = BloodCellDataset(dir_name, val_transforms)
     val_dataset = BloodCellDataset(dir_name, val_transforms)
     train_loader = DataLoader(
         dataset=train_dataset,
@@ -98,7 +99,7 @@ def hocv_model(
         collate_fn=utils.collate_fn
         )
     no_transform_loader = DataLoader(
-        dataset=no_transform_train,
+        dataset=non_augment_train,
         sampler=SubsetRandomSampler(train_idxs),
         batch_size=batch_size,
         collate_fn=utils.collate_fn
@@ -112,15 +113,18 @@ def hocv_model(
     model.to(device)
     # Build optimizer
     params = [p for p in model.parameters()]
-    optimizer = torch.optim.Adam(params, lr=learning_rate)
-    # Implement learning rate scheduler to divide learning rate by 10 every 5 epochs
+    optimizer = torch.optim.SGD(params, lr=learning_rate)
+    # Implement learning rate scheduler to divide learning rate by 10 every 3 epochs
     lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, 5, 0.1)
-
+    val_metrics = []
+    train_metrics = []
     for epoch in range(num_epochs):
         train_one_epoch(model, optimizer, train_loader, device, epoch, print_freq=10)
         lr_scheduler.step()
-        val_metrics = evaluate(model, val_loader, device=device)
+        tmp_val_met = evaluate(model, val_loader, device=device) # coco_eval object, take metrics from here
+        val_metrics.append(tmp_val_met.coco_eval['bbox'].stats[0:3])
         with HiddenPrints():
-            train_metrics = evaluate(model, no_transform_loader, device=device)
-    return model, val_metrics, train_metrics
+            tmp_train_met = evaluate(model, no_transform_loader, device=device)
+            train_metrics.append(tmp_train_met.coco_eval['bbox'].stats[0:3])
+    return model, np.array(val_metrics), np.array(train_metrics)
 

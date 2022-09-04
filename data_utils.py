@@ -18,7 +18,7 @@ class BloodCellDataset(Dataset):
         self.transforms = transforms
         self.anno_df = pd.read_csv(os.path.join(self.dir_path, 'clean_anno.csv'))
     
-    def __get__item(self, idx):
+    def __getitem__(self, idx):
         img_id = self.all_images[idx]
         img_path = os.path.join(self.dir_path, "images", img_id)
         img = Image.open(img_path).convert("RGB")  
