@@ -3,20 +3,32 @@ from PIL import Image, ImageDraw, ImageFont
 import numpy as np
 import pandas as pd
 import cv2
+import torchvision
 
 
-def plot_img_w_box(img, tgt):
+def plot_img_w_box(img, tgt, nms=False, iou_threshold=0.4):
+    if nms:
+        tgt = non_max_suppress(tgt, iou_threshold)
     draw_img = ImageDraw.Draw(img)
     for i, box in enumerate(tgt['boxes']):
         if tgt['labels'][i] == 1:
             draw_img.rectangle(box, outline='red')
-            font = ImageFont.truetype("sans_serif.ttf", 8)
+            font = ImageFont.load_default()
             draw_img.text(xy=(box[0]-5, box[1]-5), text="RBC", fill="red", font=font)
         elif tgt['labels'][i] == 2:
             draw_img.rectangle(box, outline='blue')
-            font = ImageFont.truetype("sans_serif.ttf", 8)
-            draw_img.text(xy=(box[0]-5, box[1]-5), text="WBC", fill="blue", font=font)
+            font = ImageFont.load_default()
+            draw_img.text(xy=(box[0], box[1]-10), text="WBC", fill="blue", font=font)
     img.show()
+
+
+def non_max_suppress(pred, iou_threshold=0.4):
+    keep_arr = torchvision.ops.nms(pred['boxes'], pred['scores'], iou_threshold)
+    final_pred = pred
+    final_pred['boxes'] = final_pred['boxes'][keep_arr]
+    final_pred['scores'] = final_pred['scores'][keep_arr]
+    final_pred['labels'] = final_pred['labels'][keep_arr]
+    return final_pred
 
 
 def show_img_with_anno(img_file_path, anno_file_path):

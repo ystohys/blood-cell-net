@@ -57,4 +57,6 @@ def get_bcnet(model_name, num_classes, num_trainable_layers=1):
             bcnet.anchor_generator.num_anchors_per_location(),
             num_classes
         )
+    else:
+        raise ValueError("Input should be one of 'frcnn', 'retina' or 'ssd'!")
     return bcnet

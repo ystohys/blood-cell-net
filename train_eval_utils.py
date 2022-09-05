@@ -257,4 +257,36 @@ def plot_metrics_per_epoch(
         ax.legend(legend_obj, legends, loc='upper left')
         plt.show()
 
+
+def eval_model(
+    model,
+    dir_name,
+    test_idxs,
+    test_transforms,
+    batch_size=1
+):
+    device = torch.device('cuda' if torch.cuda.is_available else 'cpu')
+    test_dataset = BloodCellDataset(dir_name, test_transforms)
+    test_loader = DataLoader(
+        dataset=test_dataset,
+        sampler=SubsetRandomSampler(test_idxs),
+        batch_size=batch_size,
+        collate_fn=utils.collate_fn
+    )
+    test_met = {}
+    # No need to set model.eval() because it is done within evaluate function
+    tmp = evaluate(model, test_loader, device=device)
+    test_met['coco_map'] = tmp.coco_eval['bbox'].stats[0]
+    test_met['map_50'] = tmp.coco_eval['bbox'].stats[1]
+    test_met['map_75'] = tmp.coco_eval['bbox'].stats[2]
+    return test_met
+
         
+def save_model(model, model_name, save_path=None):
+    if not save_path:
+        save_path = '{0}.pth'.format(model_name)
+    torch.save(model.state_dict(), save_path)
+    print('Model saved at: {0}'.format(save_path))
+
+
+
