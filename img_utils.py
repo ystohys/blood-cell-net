@@ -12,11 +12,11 @@ def plot_img_w_box(img, tgt, nms=False, iou_threshold=0.4):
     draw_img = ImageDraw.Draw(img)
     for i, box in enumerate(tgt['boxes']):
         if tgt['labels'][i] == 1:
-            draw_img.rectangle(box, outline='red')
+            draw_img.rectangle((box[0],box[1],box[2],box[3]), outline='red')
             font = ImageFont.load_default()
             draw_img.text(xy=(box[0]-5, box[1]-5), text="RBC", fill="red", font=font)
         elif tgt['labels'][i] == 2:
-            draw_img.rectangle(box, outline='blue')
+            draw_img.rectangle((box[0],box[1],box[2],box[3]), outline='blue')
             font = ImageFont.load_default()
             draw_img.text(xy=(box[0], box[1]-10), text="WBC", fill="blue", font=font)
     img.show()
