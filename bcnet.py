@@ -13,6 +13,17 @@ from torchvision.models.detection import (
 )
 
 def get_bcnet(model_name, num_classes, num_trainable_layers=1):
+    """
+    Returns an instance of a modified pre-trained model for training.
+
+    Args:
+    - model_name: string which is one of 'frcnn', 'retina', 'ssd'
+    - num_classes: number of types of objects to detect, plus 1 for the background
+    - num_trainable_layers: number of final layers in the backbone network to retrain (default=1)
+
+    Returns:
+    - bcnet: an instance of the pre-trained model, ready for fine-tuning
+    """
     if model_name == 'frcnn':
         # function on next line returns a pre-trained faster RCNN model
         bcnet = fasterrcnn_resnet50_fpn_v2(

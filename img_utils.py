@@ -1,12 +1,26 @@
 import os
 from PIL import Image, ImageDraw, ImageFont
+import torch
 import numpy as np
 import pandas as pd
 import cv2
 import torchvision
+from torchvision.transforms.functional import to_pil_image
 
 
 def plot_img_w_box(img, tgt, nms=False, iou_threshold=0.4):
+    """
+    Main function used to plot images and the respective bounding boxes. Images and bounding box 
+    information fed to this must be obtained from a BloodCellDataset instance.
+
+    Args:
+    - img: An image (PIL image or torch.Tensor) obtained from a BloodCellDataset instance
+    - tgt: Either predictions from the model or a targets obtained from a BloodCellDataset instance
+    - nms: Whether to apply non-maximum suppression to the predictions. False by default
+    - iou_threshold: IoU threshold to use when applying non-maximum suppresion
+    """
+    if isinstance(img, torch.Tensor):
+        img = to_pil_image(img)
     if nms:
         tgt = non_max_suppress(tgt, iou_threshold)
     draw_img = ImageDraw.Draw(img)
@@ -23,6 +37,18 @@ def plot_img_w_box(img, tgt, nms=False, iou_threshold=0.4):
 
 
 def non_max_suppress(pred, iou_threshold=0.4):
+    """
+    Performs non-maximum suppression to only keep the bounding boxes with the highest scores
+    and remove those that overlap with them.
+
+    Args:
+    - pred: predictions output obtained directly from the model
+    - iou_threshold: Any bounding box that has a lower confidence score than another bounding box, but
+    has an IoU with that box that is greater than this threshold will be removed
+    
+    Return:
+    - final_pred: prediction containing the remaining bounding boxes after NMS is performed
+    """
     keep_arr = torchvision.ops.nms(pred['boxes'], pred['scores'], iou_threshold)
     final_pred = pred
     final_pred['boxes'] = final_pred['boxes'][keep_arr]
@@ -32,6 +58,10 @@ def non_max_suppress(pred, iou_threshold=0.4):
 
 
 def show_img_with_anno(img_file_path, anno_file_path):
+    """
+    Another function to show images and their bounding boxes in a new window. This function
+    only accepts paths to the directory containing the images and the metadata csv file (annotations.csv)
+    """
     img_file = os.path.split(img_file_path)[1]
     anno_df = pd.read_csv(anno_file_path)
     

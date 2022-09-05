@@ -265,6 +265,19 @@ def eval_model(
     test_transforms,
     batch_size=1
 ):
+    """
+    Evaluates the model on the test dataset.
+
+    Args:
+        - model: One of the already trained models for object detection
+        - dir_name: (Relative) path to directory where the data is stored
+        - test_idxs: List of indices corresponding to the test images
+        - test_transforms: Composed transforms obtained from get_transform function, with no augmentation
+        - batch_size: Batch size to use for evaluation
+
+    Return:
+        - test_met: Python dict containing the test metrics.
+    """
     device = torch.device('cuda' if torch.cuda.is_available else 'cpu')
     test_dataset = BloodCellDataset(dir_name, test_transforms)
     test_loader = DataLoader(
@@ -283,22 +296,48 @@ def eval_model(
 
 
 def model_predict(model, img):
+    """
+    Generates prediction from a given model.
+
+    Args:
+        - model: Model to use for prediction
+        - img: An image as a torch.Tensor object, returned by BloodCellDataset
+
+    Returns:
+        - prediction: Python dict containing information about the predicted bounding boxes.
+    """
     if model.training:
         model.eval()
-    prediction = model(img)
+    img = img.to(torch.device('cuda' if torch.cuda.is_available() else 'cpu'))
+    prediction = model([img])[0]
     model.train()
     return prediction
 
         
 def save_model(model, model_name=None, save_path=None):
-    if not save_path:
+    """
+    Saves a state_dict of the given model, which can be loaded in future to obtain the fully trained model.
+
+    Args:
+        - model: model to save
+        - model_name: name of the model to save as
+        - save_path: directory to save the model in OR relative path (including .pth extension) 
+                     to save the model in
+
+    """
+    if not save_path or not save_path.endswith('.pth'):
         if not model_name:
-            raise ValueError("model_name must be provided if no save_path given!")
+            raise ValueError("model_name must be provided if no save_path given or save_path does not include save file!")
         save_path = '{0}.pth'.format(model_name)
     torch.save(model.state_dict(), save_path)
     print('Model saved at: {0}'.format(save_path))
 
 
 def load_model(model_obj, saved_path):
+    """
+    Loads the saved state_dict information from saved_path into the initialized 
+    model_obj (obtained from get_bcnet())
+    """
     model_obj.load_state_dict(torch.load(saved_path))
+    model_obj.to(torch.device('cuda' if torch.cuda.is_available() else 'cpu'))
 

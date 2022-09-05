@@ -67,6 +67,9 @@ class PILToNormTensor(nn.Module):
 
 
 class RandomVerticalFlip(TT.RandomVerticalFlip):
+    """
+    Randomly flips the image and bounding box along the vertical axis.
+    """
     def forward(
         self, image, target
     ):
@@ -79,6 +82,10 @@ class RandomVerticalFlip(TT.RandomVerticalFlip):
 
 
 def get_transform(train):
+    """
+    Returns a composed set of transformations. Set train=True to get transforms for training, inclusive of
+    data augmentation transforms. Otherwise set train=False for validation/test set evaluation.
+    """
     transforms = []
     transforms.append(PILToNormTensor())
     if train:
@@ -92,6 +99,10 @@ def get_transform(train):
 ################################################
 
 def get_duplicates(anno_df):
+    """
+    Obtains all bounding boxes with the exact same coordinates as another and returns them
+    in a pandas DataFrame for inspection.
+    """
     if isinstance(anno_df, str):
         anno_df = pd.read_csv(anno_df)
     dup_df = anno_df.loc[anno_df.duplicated(subset=['image','xmin','ymin','xmax','ymax'], keep=False),:]
@@ -99,6 +110,9 @@ def get_duplicates(anno_df):
 
 
 def get_class_distribution(anno_df, agg_idx, plot_dpi=130):
+    """
+    Generates a plot that shows class distribution of the objects within each image.
+    """
     if isinstance(anno_df, str):
         anno_df = pd.read_csv(anno_df)
     agg_df = anno_df.groupby(agg_idx, as_index=False).size()
