@@ -38,7 +38,7 @@ def train_model(
     Args:
         - model: One of the pre-trained models for object detection in torchvision, obtained from bcnet.py
         - dir_name: (Relative) path to directory where the data is stored
-        - train_idxs: List of filenames of images in training set. E.g. ['image-1.png', 'image-2.png']
+        - train_idxs: List of indices corresponding to the training images
         - transforms: Composed transforms obtained from get_transform function
         - num_epochs: Number of epochs to train for
         - batch_size: Batch size to use for training
@@ -281,12 +281,24 @@ def eval_model(
     test_met['map_75'] = tmp.coco_eval['bbox'].stats[2]
     return test_met
 
+
+def model_predict(model, img):
+    if model.training:
+        model.eval()
+    prediction = model(img)
+    model.train()
+    return prediction
+
         
-def save_model(model, model_name, save_path=None):
+def save_model(model, model_name=None, save_path=None):
     if not save_path:
+        if not model_name:
+            raise ValueError("model_name must be provided if no save_path given!")
         save_path = '{0}.pth'.format(model_name)
     torch.save(model.state_dict(), save_path)
     print('Model saved at: {0}'.format(save_path))
 
 
+def load_model(model_obj, saved_path):
+    model_obj.load_state_dict(torch.load(saved_path))
 
