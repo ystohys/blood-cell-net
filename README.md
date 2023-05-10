@@ -17,3 +17,7 @@ Unfortunately, I will be unable to provide an environment.yml file for setup as 
 Once everything is installed, activate the conda environment and use Terminal to navigate to the working directory containing this README file and the code. Together with the "Code Walkthrough" section of the report, the Jupyter notebook named "main.ipynb" will give a good introduction to how the code works!
 
 If there are any issues with setting up or questions regarding the code, please feel free to contact me through my email [yousheng.toh@gmail.com].
+
+# Data
+
+Many thanks to Dr Aslan for providing this open-source dataset here: https://www.kaggle.com/datasets/draaslan/blood-cell-detection-dataset
